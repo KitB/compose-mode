@@ -4,8 +4,6 @@ import os.path
 
 from setuptools import setup
 
-import compose_mode
-
 install_requires = [
     'docker-compose',
     'PyYAML >= 3.10, < 4',
@@ -23,7 +21,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme_file:
 setup(
     # Metadata
     name='compose-mode',
-    version=compose_mode.__version__,
+    version='0.0.2',
     packages=['compose_mode'],
     author='Kit Barnes',
     author_email='k.barnes@mhnltd.co.uk',

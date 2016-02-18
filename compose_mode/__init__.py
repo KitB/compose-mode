@@ -6,7 +6,6 @@ import os
 import yaml
 
 
-__version__ = '0.0.1'
 DEFAULT_MODES_FILE = 'compose-modes.yml'
 
 
