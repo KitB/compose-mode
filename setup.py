@@ -21,7 +21,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme_file:
 setup(
     # Metadata
     name='compose-mode',
-    version='0.0.3',
+    version='0.1.0',
     packages=['compose_mode'],
     author='Kit Barnes',
     author_email='k.barnes@mhnltd.co.uk',
