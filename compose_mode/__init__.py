@@ -46,7 +46,7 @@ def main():
     compose_binary_path = os.popen('which docker-compose').read().strip()
 
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('-f', '--modes-file', default=DEFAULT_MODES_FILE,
+    parser.add_argument('--modes-file', default=DEFAULT_MODES_FILE,
                         help='The name or path of the modes file, will search'
                              ' in containing directories if a relative name is'
                              ' given')
