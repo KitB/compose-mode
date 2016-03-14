@@ -36,9 +36,12 @@ def construct_f_args(modes, chosen_mode):
     return ' '.join('-f {}'.format(yml) for yml in yml_list).split()
 
 
-def run_compose(binary_path, modes, chosen_mode, args):
+def run_compose(binary_path, modes, chosen_mode, project_name, args):
+    # -f something -f something_else
     f_args = construct_f_args(modes, chosen_mode)
-    os.execv(binary_path, ['docker-compose'] + f_args + args)
+    project_name_args = ['-p', '{}_{}'.format(project_name, chosen_mode)]
+    run_args = ['docker-compose'] + project_name_args + f_args + args
+    os.execv(binary_path, run_args)
 
 
 def main():
@@ -60,8 +63,17 @@ def main():
 
     args, remaining_args = parser.parse_known_args()
 
+    project_name = os.path.basename(
+        os.path.dirname(
+            os.path.realpath(args.modes_file)
+        )
+    )
     modes = get_modes(args.modes_file)
-    run_compose(args.compose_binary, modes, args.mode, remaining_args)
+    run_compose(args.compose_binary,
+                modes,
+                args.mode,
+                project_name,
+                remaining_args)
 
 if __name__ == '__main__':
     main()
