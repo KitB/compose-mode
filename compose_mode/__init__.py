@@ -59,11 +59,15 @@ def main():
                         required=not compose_binary_path,  # False if ''
                         help='Where to find compose')
 
-    parser.add_argument('mode')
+    parser.add_argument('mode', nargs='?', default='list')
 
     args, remaining_args = parser.parse_known_args()
 
     modes_path, modes = get_modes(args.modes_file)
+
+    if args.mode == 'list':
+        print '\n'.join(sorted(modes.iterkeys()))
+        return
 
     containing_dir = os.path.dirname(modes_path)
 
