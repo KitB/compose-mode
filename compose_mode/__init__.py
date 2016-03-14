@@ -28,7 +28,7 @@ def _search_up(filename, stop_at_git=True):
 def get_modes(modes_filename=DEFAULT_MODES_FILE):
     modes_path = _search_up(modes_filename)
     with open(modes_path, 'r') as modes_file:
-        return yaml.safe_load(modes_file)
+        return modes_path, yaml.safe_load(modes_file)
 
 
 def construct_f_args(modes, chosen_mode):
@@ -63,12 +63,15 @@ def main():
 
     args, remaining_args = parser.parse_known_args()
 
-    project_name = os.path.basename(
-        os.path.dirname(
-            os.path.realpath(args.modes_file)
-        )
-    )
-    modes = get_modes(args.modes_file)
+    modes_path, modes = get_modes(args.modes_file)
+
+    containing_dir = os.path.dirname(modes_path)
+
+    # Easier than trying to join the paths up properly
+    os.chdir(containing_dir)
+
+    project_name = os.path.basename(containing_dir)
+
     run_compose(args.compose_binary,
                 modes,
                 args.mode,
