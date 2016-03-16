@@ -3,6 +3,8 @@
 import argparse
 import os
 
+from compose import config
+from compose.config import serialize
 import yaml
 
 
@@ -28,36 +30,41 @@ def _search_up(filename, stop_at_git=True):
 def get_modes(modes_filename=DEFAULT_MODES_FILE):
     modes_path = _search_up(modes_filename)
     with open(modes_path, 'r') as modes_file:
-        return modes_path, yaml.safe_load(modes_file)
+        return os.path.realpath(modes_path), yaml.safe_load(modes_file)
 
 
-def construct_f_args(modes, chosen_mode):
-    yml_list = modes[chosen_mode]
-    return ' '.join('-f {}'.format(yml) for yml in yml_list).split()
+def fix_restart(restart_config):
+    mrc = restart_config['MaximumRetryCount']
+    name = restart_config['Name']
+
+    if name in ['always', 'unless-stopped', 'no']:
+        return name
+    else:
+        return '{}:{}'.format(name, mrc)
 
 
-def run_compose(binary_path, modes, chosen_mode, project_name, args):
-    # -f something -f something_else
-    f_args = construct_f_args(modes, chosen_mode)
-    project_name_args = ['-p', '{}_{}'.format(project_name, chosen_mode)]
-    run_args = ['docker-compose'] + project_name_args + f_args + args
-    os.execv(binary_path, run_args)
+def fix_restarts(input_yaml):
+    config_dict = yaml.safe_load(input_yaml)
+    for service in config_dict['services'].itervalues():
+        try:
+            service['restart'] = fix_restart(service['restart'])
+        except KeyError:
+            pass
+    return yaml.safe_dump(config_dict,
+                          default_flow_style=False,
+                          indent=4,
+                          width=80)
 
 
 def main():
-    # Find docker-compose
-    compose_binary_path = os.popen('which docker-compose').read().strip()
-
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--modes-file', default=DEFAULT_MODES_FILE,
                         help='The name or path of the modes file, will search'
                              ' in containing directories if a relative name is'
                              ' given')
-
-    parser.add_argument('--compose-binary',
-                        default=compose_binary_path,
-                        required=not compose_binary_path,  # False if ''
-                        help='Where to find compose')
+    parser.add_argument(
+        '--output', default='docker-compose.yml',
+        help='The file to output the effective configuration to')
 
     parser.add_argument('mode', nargs='?', default='list')
 
@@ -74,13 +81,15 @@ def main():
     # Easier than trying to join the paths up properly
     os.chdir(containing_dir)
 
-    project_name = os.path.basename(containing_dir)
+    # project_name = os.path.basename(containing_dir)
+    config_details = config.find(containing_dir, modes[args.mode])
+    loaded_config = config.load(config_details)
 
-    run_compose(args.compose_binary,
-                modes,
-                args.mode,
-                project_name,
-                remaining_args)
+    broken_serialized = serialize.serialize_config(loaded_config)
+    fixed_serialized = fix_restarts(broken_serialized)
+
+    with open(args.output, 'w') as output_file:
+        output_file.write(fixed_serialized)
 
 if __name__ == '__main__':
     main()
