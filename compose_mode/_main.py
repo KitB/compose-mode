@@ -74,7 +74,7 @@ def main():
                         help='The mode to switch to, leave blank or set to '
                              '"list" to list available modes.')
 
-    args, remaining_args = parser.parse_known_args()
+    args = parser.parse_args()
 
     if args.version:
         print compose_mode.__version__
