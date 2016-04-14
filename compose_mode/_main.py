@@ -4,7 +4,7 @@ import argparse
 import os
 
 from compose import config
-from compose.config import serialize
+from compose.config import serialize, environment
 import yaml
 
 import compose_mode
@@ -92,7 +92,12 @@ def main():
     os.chdir(containing_dir)
 
     # project_name = os.path.basename(containing_dir)
-    config_details = config.find(containing_dir, modes[args.mode])
+    # entries in `modes` are each a list of filenames
+    config_details = config.find(
+        containing_dir,
+        modes[args.mode],
+        environment.Environment.from_env_file(containing_dir)
+    )
     loaded_config = config.load(config_details)
 
     broken_serialized = serialize.serialize_config(loaded_config)
