@@ -84,26 +84,7 @@ def set_current_mode(mode):
         state_file.write(mode)
 
 
-def set_mode(output, selected_mode, modes_file):
-    modes_path, modes = get_modes(modes_file)
-
-    containing_dir = os.path.dirname(modes_path)
-
-    # Easier than trying to join the paths up properly
-    os.chdir(containing_dir)
-
-    current_mode = get_current_mode()
-
-    if selected_mode == 'list':
-        for mode in sorted(modes.iterkeys()):
-            if mode == current_mode:
-                print mode + ' *'
-            else:
-                print mode
-        print '\n'.join(sorted(modes.iterkeys()))
-        return
-
-    # project_name = os.path.basename(containing_dir)
+def get_selected_mode_config(selected_mode, modes, containing_dir):
     # entries in `modes` are each a list of filenames
     config_details = config.find(
         containing_dir,
@@ -115,8 +96,50 @@ def set_mode(output, selected_mode, modes_file):
     broken_serialized = serialize.serialize_config(loaded_config)
     fixed_serialized = fix_restarts(broken_serialized)
 
+    return fixed_serialized
+
+
+def get_current_mode_up_to_date(current_mode_config, output_file):
+    with open(output_file, 'r') as output_f:
+        actual_current = output_f.read()
+    return actual_current == current_mode_config
+
+
+def handle_list(modes, output_file, containing_dir):
+    current_mode = get_current_mode()
+
+    for mode in sorted(modes.iterkeys()):
+        print mode,  # comma prevents newline
+        if mode == current_mode:
+            print '*',
+            current_mode_config = get_selected_mode_config(mode,
+                                                           modes,
+                                                           containing_dir)
+            if not get_current_mode_up_to_date(
+                    current_mode_config,
+                    output_file):
+                print 'Out of date!',
+        print
+
+
+def set_mode(output, selected_mode, modes_file):
+    modes_path, modes = get_modes(modes_file)
+
+    containing_dir = os.path.dirname(modes_path)
+
+    # Easier than trying to join the paths up properly
+    os.chdir(containing_dir)
+
+    if selected_mode == 'list':
+        handle_list(modes, output, containing_dir)
+        return
+
+    selected_mode_config = get_selected_mode_config(selected_mode, modes,
+                                                    containing_dir)
+
+    # project_name = os.path.basename(containing_dir)
     with open(output, 'w') as output_file:
-        output_file.write(fixed_serialized)
+        output_file.write(selected_mode_config)
     set_current_mode(selected_mode)
 
 
