@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import logging
 import os
 
 from compose import config
@@ -8,6 +9,8 @@ from compose.config import serialize, environment
 import yaml
 
 import compose_mode
+
+logging.basicConfig()
 
 
 DEFAULT_MODES_FILE = 'compose-modes.yml'
