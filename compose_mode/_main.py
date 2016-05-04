@@ -54,8 +54,16 @@ def fix_restart(restart_config):
         return '{}:{}'.format(name, mrc)
 
 
-def fix_restarts(input_yaml):
-    """ Run `fix_restart` on all found configurations.
+def fix_network(network):
+    try:
+        del network['external_name']
+    except KeyError:
+        pass
+    return network
+
+
+def fix_merged_configs(input_yaml):
+    """ Fix various merge problems for configs
 
     See docs for `fix_restart` for why.
     """
@@ -65,6 +73,11 @@ def fix_restarts(input_yaml):
             service['restart'] = fix_restart(service['restart'])
         except KeyError:
             pass
+
+    networks = config_dict['networks']
+    for name, network in networks.iteritems():
+        networks[name] = fix_network(network)
+
     return yaml.safe_dump(config_dict,
                           default_flow_style=False,
                           indent=4,
@@ -94,7 +107,7 @@ def get_selected_mode_config(selected_mode, modes, containing_dir):
     loaded_config = config.load(config_details)
 
     broken_serialized = serialize.serialize_config(loaded_config)
-    fixed_serialized = fix_restarts(broken_serialized)
+    fixed_serialized = fix_merged_configs(broken_serialized)
 
     return fixed_serialized
 
