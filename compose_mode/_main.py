@@ -48,8 +48,12 @@ def fix_restart(restart_config):
     they then forget to convert back to the yaml format. We do that by hand
     here.
     """
-    mrc = restart_config['MaximumRetryCount']
-    name = restart_config['Name']
+    try:
+        mrc = restart_config['MaximumRetryCount']
+    except TypeError:
+        name = restart_config
+    else:
+        name = restart_config['Name']
 
     if name in ['always', 'unless-stopped', 'no']:
         return name
