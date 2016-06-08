@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import json
 import logging
 import os
 
@@ -142,7 +143,28 @@ def handle_list(modes, output_file, containing_dir):
         print
 
 
-def set_mode(output, selected_mode, modes_file):
+def handle_machine_readable_status(modes, output_file, containing_dir, print_json=False):
+    current_mode = get_current_mode()
+    current_mode_config = get_selected_mode_config(
+        current_mode,
+        modes,
+        containing_dir
+    )
+
+    dirty = not get_current_mode_up_to_date(current_mode_config, output_file)
+
+    if not print_json:
+        dirty_str = 'y' if dirty else 'n'
+        print '{} {}'.format(current_mode, dirty_str)
+    else:
+        print json.dumps({'mode': current_mode, 'dirty': dirty})
+
+
+def set_mode(args):
+    output = args.output
+    selected_mode = args.mode
+    modes_file = args.modes_file
+
     modes_path, modes = get_modes(modes_file)
 
     containing_dir = os.path.dirname(modes_path)
@@ -150,7 +172,10 @@ def set_mode(output, selected_mode, modes_file):
     # Easier than trying to join the paths up properly
     os.chdir(containing_dir)
 
-    if selected_mode == 'list':
+    if args.machine_readable or args.json:
+        handle_machine_readable_status(modes, output, containing_dir, args.json)
+        return
+    elif selected_mode == 'list':
         handle_list(modes, output, containing_dir)
         return
 
@@ -171,6 +196,10 @@ def main():
                         help='The name or path of the modes file, will search'
                              ' in containing directories if a relative name is'
                              ' given')
+    parser.add_argument('--machine-readable', action='store_true',
+                        help='Output the status in easy machine parseable format then exit')
+    parser.add_argument('--json', action='store_true',
+                        help='Output the status in json then exit')
     parser.add_argument(
         '--output', default='docker-compose.yml',
         help='The file to output the effective configuration to')
@@ -181,7 +210,7 @@ def main():
 
     args = parser.parse_args()
 
-    set_mode(args.output, args.mode, args.modes_file)
+    set_mode(args)
 
 
 if __name__ == '__main__':
