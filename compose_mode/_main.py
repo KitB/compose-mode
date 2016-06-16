@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import sys
 
 import compose_mode
 from compose_mode import exceptions, generate, io, status
@@ -34,7 +35,7 @@ def set_mode(args):
         modes_path, modes = io.get_modes(modes_file)
     except exceptions.ComposeModeYmlNotFound:
         print NO_CONFIG_HELP.format(modes_file)
-        return
+        return 1
 
     containing_dir = os.path.dirname(modes_path)
 
@@ -44,10 +45,10 @@ def set_mode(args):
     # (These will halt execution)
     if args.machine_readable or args.json:
         status.handle_machine_readable_status(modes, output, containing_dir, args.json)
-        return
+        return 0
     elif selected_mode == 'list':
         status.handle_list(modes, output, containing_dir)
-        return
+        return 0
 
     # Generate the configuration
     output_configuration = generate.configuration(selected_mode, modes, containing_dir)
@@ -56,6 +57,8 @@ def set_mode(args):
     with open(output, 'w') as output_file:
         output_file.write(output_configuration)
     io.set_current_mode(selected_mode)
+
+    return 0
 
 
 def main():
@@ -80,7 +83,8 @@ def main():
 
     args = parser.parse_args()
 
-    set_mode(args)
+    exit_code = set_mode(args)
+    sys.exit(exit_code)
 
 
 if __name__ == '__main__':
