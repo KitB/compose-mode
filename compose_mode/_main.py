@@ -5,9 +5,18 @@ import logging
 import os
 
 import compose_mode
-from compose_mode import generate, io, status
+from compose_mode import exceptions, generate, io, status
 
 logging.basicConfig()
+
+
+NO_CONFIG_HELP = """
+No configuration file "{}" was found within the search path.
+
+It is recommended that you create this file at the root of your git repository
+(compose-mode will not traverse out of a git repository, though it will traverse
+out of submodules and into their parent).
+""".lstrip()
 
 
 def set_mode(args):
@@ -21,7 +30,11 @@ def set_mode(args):
     modes_file = args.modes_file
 
     # Figure out and normalize the context we're working in
-    modes_path, modes = io.get_modes(modes_file)
+    try:
+        modes_path, modes = io.get_modes(modes_file)
+    except exceptions.ComposeModeYmlNotFound:
+        print NO_CONFIG_HELP.format(modes_file)
+        return
 
     containing_dir = os.path.dirname(modes_path)
 

@@ -5,6 +5,8 @@ import os
 
 import yaml
 
+from compose_mode import exceptions
+
 
 DEFAULT_MODES_FILE = 'compose-modes.yml'
 STATE_FILE = '.compose-mode.state'
@@ -21,8 +23,10 @@ def _search_up(filename, stop_at_git=True):
                                stop_at_git):
             # insisting that .git is a dir means we will traverse out of git
             # submodules, a behaviour I desire
-            raise IOError('{} not found here or any directory above here'
-                          .format(filename))
+            raise exceptions.ComposeModeYmlNotFound(
+                '{} not found here or any directory above here'
+                .format(filename)
+            )
         prefix = os.path.realpath(os.path.join(prefix, '..'))
 
 
