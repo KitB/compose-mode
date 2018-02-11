@@ -111,9 +111,10 @@ def fix_merged_configs(input_yaml):
         except KeyError:
             pass
 
-    networks = config_dict['networks']
-    for name, network in networks.iteritems():
-        networks[name] = fix_network(network)
+    if 'networks' in config_dict:
+        networks = config_dict['networks']
+        for name, network in networks.iteritems():
+            networks[name] = fix_network(network)
 
     return yaml.safe_dump(config_dict,
                           default_flow_style=False,
@@ -123,6 +124,7 @@ def fix_merged_configs(input_yaml):
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()
