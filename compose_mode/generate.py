@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """ Functions for generating the output yaml """
 import compose.config
+import sys
 from compose.config import serialize, environment
 
 import yaml
@@ -43,11 +44,17 @@ def warn(config, selected_mode, modes):
 def get_selected_mode_config(selected_mode, modes, containing_dir):
     """ Returns the string of the yaml configuration for the given mode """
     # entries in `modes` are each a list of filenames
-    config_details = compose.config.find(
-        containing_dir,
-        modes[selected_mode],
-        environment.Environment.from_env_file(containing_dir)
-    )
+    try:
+        config_details = compose.config.find(
+            containing_dir,
+            modes[selected_mode],
+            environment.Environment.from_env_file(containing_dir)
+        )
+    except KeyError:
+        print ("Specified mode not '{}' found! Please check or spelling or add"
+               " as a new mode.".format(selected_mode))
+        sys.exit()
+
     loaded_config = compose.config.load(config_details)
 
     broken_serialized = serialize.serialize_config(loaded_config)
@@ -66,7 +73,8 @@ def configuration(selected_mode, modes, containing_dir):
         from compose_mode import generate
         generate.configuration(...)
     """
-    return warn(get_selected_mode_config(selected_mode, modes, containing_dir), selected_mode, modes)
+    return warn(get_selected_mode_config(selected_mode, modes, containing_dir),
+                selected_mode, modes)
 
 
 def fix_restart(restart_config):
@@ -111,9 +119,10 @@ def fix_merged_configs(input_yaml):
         except KeyError:
             pass
 
-    networks = config_dict['networks']
-    for name, network in networks.iteritems():
-        networks[name] = fix_network(network)
+    if 'networks' in config_dict:
+        networks = config_dict['networks']
+        for name, network in networks.iteritems():
+            networks[name] = fix_network(network)
 
     return yaml.safe_dump(config_dict,
                           default_flow_style=False,
@@ -123,6 +132,7 @@ def fix_merged_configs(input_yaml):
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()
