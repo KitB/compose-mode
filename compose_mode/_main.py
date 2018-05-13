@@ -34,7 +34,7 @@ def set_mode(args):
     try:
         modes_path, modes = io.get_modes(modes_file)
     except exceptions.ComposeModeYmlNotFound:
-        print NO_CONFIG_HELP.format(modes_file)
+        print(NO_CONFIG_HELP.format(modes_file))
         return 1
 
     containing_dir = os.path.dirname(modes_path)

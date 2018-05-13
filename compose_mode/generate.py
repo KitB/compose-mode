@@ -51,8 +51,8 @@ def get_selected_mode_config(selected_mode, modes, containing_dir):
             environment.Environment.from_env_file(containing_dir)
         )
     except KeyError:
-        print ("Specified mode not '{}' found! Please check or spelling or add"
-               " as a new mode.".format(selected_mode))
+        print(("Specified mode not '{}' found! Please check or spelling or add"
+               " as a new mode.".format(selected_mode)))
         sys.exit()
 
     loaded_config = compose.config.load(config_details)
@@ -113,7 +113,7 @@ def fix_merged_configs(input_yaml):
     See docs for `fix_restart` for why.
     """
     config_dict = yaml.safe_load(input_yaml)
-    for service in config_dict['services'].itervalues():
+    for service in config_dict['services'].values():
         try:
             service['restart'] = fix_restart(service['restart'])
         except KeyError:
@@ -121,7 +121,7 @@ def fix_merged_configs(input_yaml):
 
     if 'networks' in config_dict:
         networks = config_dict['networks']
-        for name, network in networks.iteritems():
+        for name, network in networks.items():
             networks[name] = fix_network(network)
 
     return yaml.safe_dump(config_dict,
