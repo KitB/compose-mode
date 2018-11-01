@@ -18,10 +18,10 @@ def handle_list(modes, output_file, containing_dir):
     """
     current_mode = io.get_current_mode()
 
-    for mode in sorted(modes.iterkeys()):
-        print mode,  # comma prevents newline
+    for mode in sorted(modes.keys()):
+        print(mode, end=' ')  # comma prevents newline
         if mode == current_mode:
-            print '*',
+            print('*', end=' ')
             current_mode_config = generate.configuration(
                 mode,
                 modes,
@@ -30,8 +30,8 @@ def handle_list(modes, output_file, containing_dir):
             if not get_current_mode_up_to_date(
                     current_mode_config,
                     output_file):
-                print 'Out of date!',
-        print
+                print('Out of date!', end=' ')
+        print()
 
 
 def handle_machine_readable_status(modes, output_file, containing_dir, print_json=False):
@@ -50,6 +50,6 @@ def handle_machine_readable_status(modes, output_file, containing_dir, print_jso
 
     if not print_json:
         dirty_str = 'y' if dirty else 'n'
-        print '{} {}'.format(current_mode, dirty_str)
+        print('{} {}'.format(current_mode, dirty_str))
     else:
-        print json.dumps({'mode': current_mode, 'dirty': dirty})
+        print(json.dumps({'mode': current_mode, 'dirty': dirty}))
