@@ -7,7 +7,7 @@ from setuptools import setup
 import compose_mode
 
 install_requires = [
-    'docker-compose >= 1.7, < 1.9',
+    'docker-compose >= 1.7',
     'PyYAML >= 3.10, < 4',
 ]
 
