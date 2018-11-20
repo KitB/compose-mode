@@ -1,4 +1,5 @@
 import json
+import sys
 
 from compose_mode import generate, io
 
@@ -19,9 +20,9 @@ def handle_list(modes, output_file, containing_dir):
     current_mode = io.get_current_mode()
 
     for mode in sorted(modes.keys()):
-        print(mode, end=' ')  # comma prevents newline
+        sys.stdout.write(mode)  # comma prevents newline
         if mode == current_mode:
-            print('*', end=' ')
+            sys.stdout.write('*')
             current_mode_config = generate.configuration(
                 mode,
                 modes,
@@ -30,7 +31,7 @@ def handle_list(modes, output_file, containing_dir):
             if not get_current_mode_up_to_date(
                     current_mode_config,
                     output_file):
-                print('Out of date!', end=' ')
+                sys.stdout.write('Out of date!')
         print()
 
 
