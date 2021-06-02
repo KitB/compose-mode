@@ -8,13 +8,13 @@ import compose_mode
 
 install_requires = [
     'docker-compose >= 1.7',
-    'PyYAML >= 3.10, < 4',
+    'PyYAML >= 3.10',
 ]
 
 classifiers = [
     'Development Status :: 2 - Pre-Alpha',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.9',
 ]
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme_file:
